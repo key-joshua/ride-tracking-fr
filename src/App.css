@@ -1,0 +1,14 @@
+@tailwind base;
+@tailwind utilities;
+@tailwind components;
+@import './assets/style/colors.scss';
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Nunito', sans-serif;
+
+  zoom: 0.8;
+  zoom: 80%;
+  -moz-transform: scale(0.8, 0.8);
+}
