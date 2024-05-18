@@ -1,7 +1,6 @@
 @tailwind base;
 @tailwind utilities;
 @tailwind components;
-@import './assets/style/colors.scss';
 
 body {
   margin: 0;
