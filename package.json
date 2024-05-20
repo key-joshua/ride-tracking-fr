@@ -32,9 +32,10 @@
     "cra-template": "1.2.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-loader-spinner": "^6.1.6",
+    "react-loader-spinner": "^5.4.5",
     "react-router-dom": "^6.23.1",
-    "react-scripts": "^5.0.1",
+    "react-scripts": "^3.0.1",
+    "react-toastify": "^10.0.5",
     "web-vitals": "^4.0.0"
   },
   "devDependencies": {

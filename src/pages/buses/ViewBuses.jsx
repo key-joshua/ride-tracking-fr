@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { APIsRequests } from "../../api/APIsRequests";
+import { ToastContainer, toast } from 'react-toastify';
 
 import Map from "../../assets/images/map.png";
 import Loading from '../../components/loading/Loading';
@@ -46,23 +47,9 @@ export const ViewBuses = () => {
             return console.log(error);
         });
     };
-    
-    const getBusesApi = async () => {
-        await APIsRequests.getBusesApi()
-        .then((response) => {
-            setState((prevState) => ({
-                ...prevState,
-                buses: response.data.data
-            }));
-        })
-        .catch((error) => {
-            return console.log(error);
-        });
-    };
 
     getServerApi();
     getLocationsApi();
-    getBusesApi();
   }, []);
 
   const fromOnChange = (event) => {
@@ -82,25 +69,22 @@ export const ViewBuses = () => {
   }
 
   const handleSubmitClick = async() => {
-    console.log('---->', state?.origin);
-    console.log('---->', state?.destination);
     setState((prevState) => ({ ...prevState, buttonDisabled: true }));
 
-    
-
-    await APIsRequests.postStudentQuizResult(state?.origin, state?.destination)
-      .then((response) => {
+    await APIsRequests.getBusesApi(state?.origin, state?.destination)
+    .then((response) => {
         console.log('----->', response.data)
-      })
-      .catch((error) => {
-        console.log('Error', error?.response?.data?.message || error?.response?.data?.error);
-      });
+    })
+    .catch((error) => {
+        toast.error(error?.response?.data?.message || error?.response?.data?.error);
+    });
   }
 
   if (state?.pageLoading === true) return <Loading pageLoading={true} />
 
   return (
     <section className="flex flex-1 flex-col gap-10">
+        <ToastContainer />
         <nav className="flex flex-row justify-between border-gray-200 bg-primary dark:bg-gray-900">
             <a href="/" className="flex items-center">
             <img src={MinLogo} alt="Logo" className="ml-10" />
@@ -156,9 +140,9 @@ export const ViewBuses = () => {
                             <div className='flex h-full flex-1 flex-col'>
                                 <div className='flex w-full items-center'>
                                     <span className='truncate px-2'>From</span>
-                                    <select onChange={fromOnChange} value={state?.origin} className='focus:shadow-outline  h-auto flex-1 rounded border-b border-gray-300 px-4 leading-tight text-gray-500 focus:outline-none max-[768px]:w-full'>
+                                    <select onChange={fromOnChange} value={state?.origin} className='focus:shadow-outline h-auto flex-1 rounded border-b border-gray-300 px-4 leading-tight text-gray-500 focus:outline-none max-[768px]:w-full'>
                                         <option/>
-                                        { state?.locations.map((element => (<option key={element?.id} value={element?.location_name}>{element?.location_name}</option>)))}
+                                        { state?.locations.map((element => (<option key={element?.id} value={element?.id} className='bg-primary text-white'>{element?.location_name}</option>)))}
                                     </select>
                                 </div>
                             </div>
@@ -173,9 +157,9 @@ export const ViewBuses = () => {
                             <div className='flex h-full flex-1 flex-col'>
                                 <div className='flex w-full items-center'>
                                     <span className='truncate px-2'>To</span>
-                                    <select onChange={toOnChange} value={state?.destination} className='focus:shadow-outline  h-auto flex-1 rounded border-b border-gray-300 px-4 leading-tight text-gray-500 focus:outline-none max-[768px]:w-full'>
+                                    <select onChange={toOnChange} value={state?.destination} className='focus:shadow-outline h-auto flex-1 rounded border-b border-gray-300 px-4 leading-tight text-gray-500 focus:outline-none max-[768px]:w-full'>
                                         <option/>
-                                        { state?.locations.map((element => (<option key={element?.id} value={element?.location_name}>{element?.location_name}</option>)))}
+                                        { state?.locations.map((element => (<option key={element?.id} value={element?.id} className='bg-primary text-white'>{element?.location_name}</option>)))}
                                     </select>
                                 </div>
                             </div>

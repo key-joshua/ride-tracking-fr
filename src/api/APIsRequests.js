@@ -11,6 +11,6 @@ export const APIsRequests = {
   },
 
   getBusesApi: async (origin, destination) => {
-    return await axios.get(variables.GET_BUSES_API);
+    return await axios.get(`${variables.GET_BUSES_API}/${origin}/${destination}`);
   },
 };
