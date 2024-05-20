@@ -17,7 +17,7 @@ export const ViewBuses = () => {
         .then((response) => {
           setState((prevState) => ({
             ...prevState,
-            pageLoading: true,
+            pageLoading: false,
             data: response?.data,
           }));
         })
