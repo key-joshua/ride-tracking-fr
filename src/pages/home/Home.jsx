@@ -1,15 +1,20 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+
 import { APIsRequests } from "../../api/APIsRequests";
 import MinLogo from "../../assets/images/min-logo.png";
 import BusStop from "../../assets/images/bus-stop.png";
+import Loading from "../../components/loading/Loading";
 import BusPhone from "../../assets/images/bus-phone.png";
 import BusMoving from "../../assets/images/bus-moving.png";
 import BusWaiting from "../../assets/images/bus-waiting.png";
 import BusLocation from "../../assets/images/bus-location.png";
 
 const Home = () => {
+  const navigate = useNavigate()
   const [state, setState] = useState({
     data: {},
+    pageLoading: true,
   });
 
   useEffect(() => {
@@ -18,6 +23,7 @@ const Home = () => {
         .then((response) => {
           setState((prevState) => ({
             ...prevState,
+            pageLoading: false,
             data: response?.data,
           }));
         })
@@ -29,7 +35,8 @@ const Home = () => {
     getHomeApi();
   }, []);
 
-  console.log('====>', state?.data)
+  if (state?.pageLoading === true) return <Loading pageLoading={true} />
+
   return (
     <section className="flex flex-1 flex-col gap-10 bg-primary">
       <nav className="flex flex-row justify-between border-gray-200 bg-primary dark:bg-gray-900">
@@ -55,7 +62,7 @@ const Home = () => {
             a new city or finding a new route by providing up-to-date
             information on bus schedules, routes, and stops.
           </p>
-          <button className="mt-20 rounded bg-orange px-10 py-10 text-5xl font-bold text-white"> Find your Bus</button>
+          <button onClick={() => navigate('/buses')} className="mt-20 rounded bg-orange px-10 py-10 text-5xl font-bold text-white"> Find your Bus</button>
         </div>
       </div>
       

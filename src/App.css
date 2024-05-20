@@ -11,3 +11,15 @@ body {
   zoom: 80%;
   -moz-transform: scale(0.8, 0.8);
 }
+
+
+.page-loading {
+  top: 50%;
+  left: 50%;
+  z-index: 10;
+  padding: 100%;
+  position: fixed;
+  --tw-bg-opacity: 1;
+  transform: translate(-50%, -50%);
+  background-color: rgb(35 56 98 / var(--tw-bg-opacity));
+}
