@@ -81,25 +81,34 @@ export const ViewBuses = () => {
     }));
   }
 
-  const handleSubmitClick = () => {
+  const handleSubmitClick = async() => {
     console.log('---->', state?.origin);
     console.log('---->', state?.destination);
     setState((prevState) => ({ ...prevState, buttonDisabled: true }));
+
+    
+
+    await APIsRequests.postStudentQuizResult(state?.origin, state?.destination)
+      .then((response) => {
+        console.log('----->', response.data)
+      })
+      .catch((error) => {
+        console.log('Error', error?.response?.data?.message || error?.response?.data?.error);
+      });
   }
 
   if (state?.pageLoading === true) return <Loading pageLoading={true} />
 
   return (
     <section className="flex flex-1 flex-col gap-10">
-      <nav className="flex flex-row justify-between border-gray-200 bg-primary dark:bg-gray-900">
-        <a href="/" className="flex items-center">
-          <img src={MinLogo} alt="Logo" className="ml-10" />
-          <span className="self-center whitespace-nowrap text-2xl font-semibold text-white dark:text-white">RIDE - TRACKER</span>
-        </a>
-      </nav>
-
-      
-      <div className='flex h-full w-full justify-center'>
+        <nav className="flex flex-row justify-between border-gray-200 bg-primary dark:bg-gray-900">
+            <a href="/" className="flex items-center">
+            <img src={MinLogo} alt="Logo" className="ml-10" />
+            <span className="self-center whitespace-nowrap text-2xl font-semibold text-white dark:text-white">RIDE - TRACKER</span>
+            </a>
+        </nav>
+        
+        <div className='flex h-full w-full justify-center'>
             <div className='mx-[10%] flex w-full flex-col items-center'>
 
                 <div className='flex w-full justify-between'>

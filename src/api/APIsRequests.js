@@ -10,7 +10,7 @@ export const APIsRequests = {
     return await axios.get(variables.GET_LOCATIONS_API);
   },
 
-  getBusesApi: async () => {
+  getBusesApi: async (origin, destination) => {
     return await axios.get(variables.GET_BUSES_API);
   },
 };
