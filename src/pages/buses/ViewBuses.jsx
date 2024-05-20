@@ -8,7 +8,7 @@ import MinLogo from "../../assets/images/min-logo.png";
 export const ViewBuses = () => {
   const [state, setState] = useState({
     data: {},
-    pageLoading: true,
+    pageLoading: false,
   });
 
   useEffect(() => {
@@ -40,7 +40,7 @@ export const ViewBuses = () => {
         </a>
       </nav>
       
-      
+
     </section>
   )
 }
