@@ -17,8 +17,8 @@ const Loading = (props) => {
 
   return (
     <Circles
-      width="30"
-      height="30"
+      width="20"
+      height="20"
       visible={true}
       color="#ffffff"
       wrapperStyle={{ justifyContent: "center", color: "#ffffff" }}

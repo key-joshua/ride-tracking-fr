@@ -18,8 +18,8 @@ const Home = () => {
   });
 
   useEffect(() => {
-    const getHomeApi = async () => {
-      await APIsRequests.getHomeServerMsgApi()
+    const getServerApi = async () => {
+      await APIsRequests.getServerApi()
         .then((response) => {
           setState((prevState) => ({
             ...prevState,
@@ -32,7 +32,7 @@ const Home = () => {
         });
     };
 
-    getHomeApi();
+    getServerApi();
   }, []);
 
   if (state?.pageLoading === true) return <Loading pageLoading={true} />
