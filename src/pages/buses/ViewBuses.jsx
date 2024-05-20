@@ -7,7 +7,7 @@ import MinLogo from "../../assets/images/min-logo.png";
 
 export const ViewBuses = () => {
   const [state, setState] = useState({
-    data: {},
+    message: '',
     pageLoading: false,
   });
 
@@ -18,7 +18,7 @@ export const ViewBuses = () => {
           setState((prevState) => ({
             ...prevState,
             pageLoading: false,
-            data: response?.data,
+            message: response?.data?.message,
           }));
         })
         .catch((error) => {
@@ -32,14 +32,25 @@ export const ViewBuses = () => {
   if (state?.pageLoading === true) return <Loading pageLoading={true} />
 
   return (
-    <section className="flex flex-1 flex-col gap-10 bg-primary">
+    <section className="flex flex-1 flex-col gap-10">
       <nav className="flex flex-row justify-between border-gray-200 bg-primary dark:bg-gray-900">
         <a href="/" className="flex items-center">
           <img src={MinLogo} alt="Logo" className="ml-10" />
           <span className="self-center whitespace-nowrap text-2xl font-semibold text-white dark:text-white">RIDE - TRACKER</span>
         </a>
       </nav>
+
       
+      <div className='flex h-full w-full justify-center'>
+            <div className='flex w-full max-w-7xl flex-col items-center'>
+              <div className='flex w-full justify-between'>
+                <div className='text-white bg-orange p-5'>
+                  <h1 className='text-center text-2xl font-bold'>{state?.message}</h1>
+                  {/* <p className='ml-6'>{buses.length > 1 ? buses[0].routes.route_name : null}</p> */}
+                </div>
+                </div>
+            </div>
+        </div>
 
     </section>
   )
