@@ -12,7 +12,6 @@ body {
   -moz-transform: scale(0.8, 0.8);
 }
 
-
 .page-loading {
   top: 50%;
   left: 50%;
@@ -23,3 +22,36 @@ body {
   transform: translate(-50%, -50%);
   background-color: rgb(35 56 98 / var(--tw-bg-opacity));
 }
+
+.Toastify__toast-container {
+  z-index: 100;
+  width: 380px;
+  font-size: 15px;
+  font-weight: 900;      
+}
+
+
+.Toastify__toast--success {
+  font-size: medium;
+  text-align: center;
+  color: #33A759;
+  background: #cecdcd;
+}
+
+.Toastify__toast--info {
+  color: #3575a0;
+  text-align: center;
+  background: #cecdcd;
+}
+
+.Toastify__toast--warning {
+  text-align: center;
+  color: #e6e670;
+  background: #cecdcd;
+}
+
+.Toastify__toast--error {
+  color: #9e3737;
+  text-align: center;
+  background: #cecdcd;
+}   

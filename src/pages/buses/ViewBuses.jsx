@@ -1,6 +1,10 @@
+import 'react-toastify/dist/ReactToastify.css';
+import { useNavigate } from 'react-router-dom';
 import React, { useEffect, useState } from 'react';
 import { APIsRequests } from "../../api/APIsRequests";
 import { ToastContainer, toast } from 'react-toastify';
+import { faDownLong } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import Map from "../../assets/images/map.png";
 import Loading from '../../components/loading/Loading';
@@ -8,9 +12,11 @@ import MinLogo from "../../assets/images/min-logo.png";
 
 
 export const ViewBuses = () => {
+    const navigate = useNavigate()
   const [state, setState] = useState({
     buses: {},
     locations: [],
+    routeBuses: [],
 
     message: '',
     origin: '',
@@ -35,6 +41,19 @@ export const ViewBuses = () => {
         });
     };
     
+    const getBusesApi = async () => {
+        await APIsRequests.getBusesApi()
+        .then((response) => {
+            setState((prevState) => ({
+                ...prevState,
+                buses: response?.data?.data
+            }));
+        })
+        .catch((error) => {
+            return console.log(error);
+        });
+    };
+    
     const getLocationsApi = async () => {
         await APIsRequests.getLocationsApi()
         .then((response) => {
@@ -49,6 +68,7 @@ export const ViewBuses = () => {
     };
 
     getServerApi();
+    getBusesApi();
     getLocationsApi();
   }, []);
 
@@ -71,11 +91,12 @@ export const ViewBuses = () => {
   const handleSubmitClick = async() => {
     setState((prevState) => ({ ...prevState, buttonDisabled: true }));
 
-    await APIsRequests.getBusesApi(state?.origin, state?.destination)
+    await APIsRequests.getRouteBusesApi(state?.origin, state?.destination)
     .then((response) => {
-        console.log('----->', response.data)
+        setState((prevState) => ({ ...prevState, buttonDisabled: false, routeBuses: response?.data?.data }));
     })
     .catch((error) => {
+        setState((prevState) => ({ ...prevState, buttonDisabled: false }));
         toast.error(error?.response?.data?.message || error?.response?.data?.error);
     });
   }
@@ -96,40 +117,35 @@ export const ViewBuses = () => {
             <div className='mx-[10%] flex w-full flex-col items-center'>
 
                 <div className='flex w-full justify-between'>
-                    <div className='text-white bg-orange p-5'>
+                    <div className='text-white bg-orange rounded-lg p-5'>
                         <h1 className='text-center text-2xl font-bold mb-4'> {state?.message} </h1>
-                        {/* <p className='ml-6'>{buses.length > 1 ? buses[0].routes.route_name : null}</p> */}
-                        <p className='text-center'>Hello World</p>
+                        <p className='ml-6 text-center'> {state?.routeBuses.length > 0 ? ` ${state?.routeBuses[0].routes.route_name} ` : ' Select Your Route '} <FontAwesomeIcon icon={faDownLong} /></p>
                     </div>
 
                     <div className='flex flex-1 justify-end '>
                         <div className='border-1 float-right mr-6 box-border flex h-28 w-52 items-center rounded-md bg-white shadow-lg shadow-indigo-400/20'>
-                            <h1 className='border-color-gray ml-4 rounded-full border bg-orange px-5 py-4 text-white'> { state?.buses?.count || 0 } </h1>
+                            <h1 className='border-color-gray ml-4 rounded-full border bg-orange px-5 py-3 text-white'> { state?.routeBuses?.length } </h1>
                             <p className='ml-4 text-sm text-gray-500'>Available Buses</p>
                         </div>
                     </div>
+
+                    <div className='border-1 box-border flex h-28 w-52 items-center bg-white shadow-lg shadow-indigo-400/20'>
+                        <h1 className='border-color-gray ml-4 rounded-full border bg-primary px-5 py-3 text-white'> { state?.routeBuses.reduce((acc, bus) => acc + parseInt(bus.available_sits), 0) || 0 } </h1>
+                        <p className='ml-4 text-sm text-gray-500'>Availabe Seats</p>
+                    </div>
                     
-                    <div className='border-1 relative box-border flex h-28 w-52 items-center bg-white shadow-lg shadow-indigo-400/20'>
+                    <div className='items-center justify-center border-1 relative box-border flex h-28 w-52 bg-white shadow-lg shadow-indigo-400/20'>
                         <img src={Map} alt='map' className='absolute left-0 top-0 h-full w-full' />
-                        {/* {buses.length > 0 ? (
-                        <div
-                            onClick={() => navigate('/map-view')}
-                            className='border-color-gray z-10 ml-4 cursor-pointer rounded-full border bg-orange/80 p-4 text-white transition-all duration-300 hover:scale-105'
-                        >
-                            Track buses
-                        </div>
-                        ) : (
-                        <div className='border-color-gray z-10 ml-4 cursor-pointer rounded-full border bg-orange/30 p-4 text-white transition-all duration-300 hover:scale-105'>
-                            Track buses
-                        </div>
-                        )} */}
+                        {
+                            state?.routeBuses.length > 0
+                            ? (<div onClick={() => navigate('/map-view')} className='border-color-gray z-10 ml-4 cursor-pointer rounded-full border bg-orange/80 p-4 text-white transition-all duration-300 hover:scale-105' > Track buses </div>)
+                            : (<div className='border-color-gray z-10 ml-4 cursor-pointer rounded-full border bg-orange/30 p-4 text-white transition-all duration-300 hover:scale-105'> Track buses </div>)
+                        }
                     </div>
                 </div>
 
-                
                 <div className='border-1 mt-10 box-border flex h-20 w-full items-center justify-between bg-white px-4 shadow-md shadow-indigo-400/20 sm:rounded-lg'>
                   <div className='flex w-full'>
-
                     <div className='flex flex-1 justify-between '>
                         <div className='flex w-[45%] min-w-[15rem] cursor-pointer rounded-lg px-4 py-3 font-semibold text-gray-500'>
                             <div className='flex h-full w-8 items-center justify-center'>
@@ -169,23 +185,17 @@ export const ViewBuses = () => {
                             <span>{state?.buttonDisabled ? <Loading buttonLoading={true} /> : 'Search'}</span>
                         </button>
                     </div>
-
                   </div>
                 </div>
 
-                <div className='relative w-full shadow-md shadow-indigo-400/20'>
-
-                    <div>
-                        { <h1 className='mt-5 mb-5 text-red'>No Bus found on this route</h1> || <h1 className='mt-5 mb-5'>Buses on track</h1> }
-                    </div>
-
+                <div className='my-10 relative w-full shadow-md shadow-indigo-400/20'>
                     <table className='w-full text-left text-sm text-gray-500 dark:text-gray-400'>
-                    
                         <thead className='bg-gray-50 text-xs uppercase text-gray-700 dark:bg-gray-700 dark:text-gray-400'>
                             <tr>
                             <th scope='col' className='p-4'>
                                 <div className='flex items-center'>
                                 <input
+                                    disabled
                                     id='checkbox-all'
                                     type='checkbox'
                                     className='h-4 w-4 rounded border-gray-300 bg-gray-100 text-blue-600 focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:ring-offset-gray-800 dark:focus:ring-blue-600 dark:focus:ring-offset-gray-800'
@@ -210,15 +220,30 @@ export const ViewBuses = () => {
                             </tr>
                         </thead>
                         <tbody>
+                            {state?.routeBuses.map((element) => (
+                            <tr key={`i${element.id}`} className='border-b bg-white hover:bg-gray-50 dark:bg-gray-800 dark:hover:bg-gray-600' >
+                                <td className='w-4 p-4'>
+                                    <div className='flex items-center'>
+                                        <input
+                                            type='checkbox'
+                                            id='checkbox-table-1'
+                                            className='h-4 w-4 rounded border-gray-300 bg-gray-100 text-blue-600 focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:ring-offset-gray-800 dark:focus:ring-blue-600 dark:focus:ring-offset-gray-800'
+                                        />
+                                        <label htmlFor='checkbox-table-1' className='sr-only'> checkbox </label>
+                                    </div>
+                                </td>
+                                <th scope='row' className='whitespace-nowrap px-6 py-4 font-medium text-gray-900 dark:text-white' > {element.name} </th>
+                                <td className='px-6 py-4'>{element.model}</td>
+                                <td className='px-6 py-4'>{element.plate_number}</td>
+                                <td className='px-6 py-4'>{element.available_sits}</td>
+                            </tr>
+                            ))}
                         </tbody>
-
                     </table>
-
                 </div>
 
             </div>
         </div>
-
     </section>
   )
 }
