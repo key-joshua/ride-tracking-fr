@@ -29,6 +29,7 @@
   "dependencies": {
     "@fortawesome/free-solid-svg-icons": "^6.5.2",
     "@fortawesome/react-fontawesome": "^0.2.1",
+    "@react-google-maps/api": "^2.19.3",
     "@tailwindcss/line-clamp": "^0.4.2",
     "axios": "^1.6.8",
     "cra-template": "1.2.0",
