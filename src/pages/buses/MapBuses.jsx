@@ -1,3 +1,4 @@
+import '../../map.css';
 import { io, Socket } from 'socket.io-client';
 import React, { useEffect, useState } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
@@ -5,10 +6,13 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { DirectionsRenderer, GoogleMap, MarkerF, useJsApiLoader } from '@react-google-maps/api';
 
 import { dencrypt, variables } from "../../helpers";
-import MinLogo from "../../assets/images/min-logo.png";
 import { APIsRequests } from '../../api/APIsRequests';
 import Loading from '../../components/loading/Loading';
-
+import MinLogo from "../../assets/images/min-logo.png";
+import RightLeftBus0 from "../../assets/images/bus0.svg";
+// import RightLeftBus1 from "../../assets/images/bus1.svg";
+// import RightLeftBus2 from "../../assets/images/bus2.svg";
+// import RightLeftBus3 from "../../assets/images/bus3.svg";
 
 export const MapBuses = () => {
   const navigate = useNavigate();
@@ -18,17 +22,20 @@ export const MapBuses = () => {
   const origin = searchParams.get("origin");
   const destination = searchParams.get("destination");
 
-  const { isLoaded } = useJsApiLoader({
-    id: 'https://maps.googleapis.com/maps/api/js?key=AIzaSyDEDT-0K6NPqZeaptS0TXWxBxrv71PMFJ4&libraries=places',
-    googleMapsApiKey: 'AIzaSyDEDT-0K6NPqZeaptS0TXWxBxrv71PMFJ4'
-  });
+  // const RightLeftIcon0 = { url: RightLeftBus0, scaledSize: new google.maps.Size(28, 28)};
+  // const RightLeftIcon1 = { url: RightLeftBus1, scaledSize: new google.maps.Size(28, 28)};
+  // const RightLeftIcon2 = { url: RightLeftBus2, scaledSize: new google.maps.Size(28, 28)};
+  // const RightLeftIcon3 = { url: RightLeftBus3, scaledSize: new google.maps.Size(28, 28)};
+  const { isLoaded } = useJsApiLoader({ id: 'https://maps.googleapis.com/maps/api/js?key=AIzaSyDEDT-0K6NPqZeaptS0TXWxBxrv71PMFJ4&libraries=places', googleMapsApiKey: 'AIzaSyDEDT-0K6NPqZeaptS0TXWxBxrv71PMFJ4' });
 
   const [map, setMap] = useState();
   const [route, setRoute] = useState();
   const [buses, setBuses] = useState([]);
+  const [routeData, setRouteData] = useState();
+  const [disconnected, setDisconnected] = useState(false);
   const [directionsResponse, setDirectionsResponse] = useState(null);
   
-  const [selected, setSelected] = useState({
+  const [from, setFrom] = useState({
     createdAt: new Date(),
     updatedAt: new Date(),
     location_name: '',
@@ -37,7 +44,7 @@ export const MapBuses = () => {
     id: 0,
   });
 
-  const [selected1, setSelected1] = useState({
+  const [to, setTo] = useState({
     createdAt: new Date(),
     updatedAt: new Date(),
     location_name: '',
@@ -61,6 +68,7 @@ export const MapBuses = () => {
   }
 
   useEffect(() => {
+    const socket = io(ENDPOINT);
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition((position) => { setState((prevState) => ({ ...prevState, lat: position.coords.latitude, lng: position.coords.longitude })); });
     } else {
@@ -97,8 +105,40 @@ export const MapBuses = () => {
           });
 
           setBuses(BusesInRoute);
-          setSelected1(response?.data?.data[0].routes?.locations_end);
-          setSelected(response?.data?.data[0].routes?.locations_start);
+          setTo(response?.data?.data[0].routes?.locations_end);
+          setFrom(response?.data?.data[0].routes?.locations_start);
+        }
+
+        if(response?.data?.data.length > 0) {
+          socket.on('onUpdate', (busData) => {
+            setBuses((prev) => {
+              const newbuses = prev.map((bus) => {
+                if (parseInt(bus.busId, 10) === parseInt(busData.busId, 10)) {
+                  return { ...bus, ...busData };
+                }
+    
+                return bus;
+              });
+    
+              return newbuses;
+            });
+          });
+    
+          socket.on('routeData', (data) => {
+            setRouteData(data);
+          });
+    
+          socket.on('disconnect', () => {
+            setDisconnected(true);
+          });
+
+          socket.emit('join', {
+            route_id: response?.data?.data[0].routes.id,
+            origin: response?.data?.data[0].routes.locations_start.id,
+            destination: response?.data?.data[0].routes.locations_end.id }, (error) => { if (error) { console.log(error) }
+          });
+        } else {
+          navigate('/buses');
         }
       })
       .catch((error) => {
@@ -108,7 +148,6 @@ export const MapBuses = () => {
     }
 
     getRouteBusesApi();
-    const socket = io(ENDPOINT);
   }, [origin, destination]);
 
   if (state?.pageLoading === true) return <Loading pageLoading={true} />;
@@ -141,7 +180,7 @@ export const MapBuses = () => {
                         <div className='flex w-full items-center'>
                           <span className='flex-1 truncate'>From</span>
                           <span className='focus:shadow-outline  h-auto flex-1 rounded border-b border-gray-300 px-4 leading-tight text-gray-700 focus:outline-none max-[768px]:w-full'>
-                            {selected.location_name}
+                            {from.location_name}
                           </span>
                         </div>
                       </div>
@@ -157,7 +196,7 @@ export const MapBuses = () => {
                         <div className='flex w-full items-end '>
                           <span className='flex-1 truncate'>To</span>
                           <span className='focus:shadow-outline h-auto flex-1 rounded border-b border-gray-300 px-4 leading-tight  text-gray-700 focus:outline-none max-[768px]:w-full'>
-                            {selected1.location_name}
+                            {to.location_name}
                           </span>
                         </div>
                       </div>
@@ -174,10 +213,36 @@ export const MapBuses = () => {
                   options={{ zoomControl: false, streetViewControl: false, mapTypeControl: false, fullscreenControl: false }}
                 >
 
+                {buses.map((bus, i) => {
+                    // if (i === 0) return (<MarkerF key={`${bus.busId}_${i}`} position={{ lat: bus.position.lat, lng: bus.position.lng }} icon={RightLeftIcon0} />);
+                    // if (i === 1) return (<MarkerF key={`${bus.busId}_${i}`} position={{ lat: bus.position.lat, lng: bus.position.lng }} icon={RightLeftIcon1} />);
+                    // if (i === 2) return (<MarkerF key={`${bus.busId}_${i}`} position={{ lat: bus.position.lat, lng: bus.position.lng }} icon={RightLeftIcon2} />);
+                    // if (i === 3) return (<MarkerF key={`${bus.busId}_${i}`} position={{ lat: bus.position.lat, lng: bus.position.lng }} icon={RightLeftIcon3} />);
+                    return (<MarkerF key={`${bus.busId}_${i}`} position={{ lat: bus.position.lat, lng: bus.position.lng }} />);
+                })}
+
+                {directionsResponse && <DirectionsRenderer directions={directionsResponse} />}
                 </GoogleMap>
               )}
+
+              {disconnected && (
+                <div className='absolute bottom-12 left-1/2 z-10 w-1/3  -translate-x-1/2 p-4'>
+                  <div className='relative flex items-center justify-between gap-4 rounded-lg bg-primary px-4 py-3 text-white shadow-lg'>
+                    <p className='text-sm font-medium'>Your are Disconnected</p>
+                    <button aria-label='Close' className='shrink-0 rounded-lg bg-primary/10 p-1 transition hover:bg-primary/20' >
+                      <svg xmlns='http://www.w3.org/2000/svg' className='h-5 w-5' viewBox='0 0 20 20' fill='currentColor'>
+                        <path
+                          fillRule='evenodd'
+                          d='M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z'
+                          clipRule='evenodd'
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
-              
+
             <div className='p-2'>
               <div className='mt-5 min-w-[300px]  bg-white '>
                 <ul className='flex flex-col '>
