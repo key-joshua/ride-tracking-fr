@@ -6,9 +6,11 @@ import { ToastContainer, toast } from 'react-toastify';
 import { faDownLong } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
+import { encrypt } from '../../helpers';
 import Map from "../../assets/images/map.png";
 import Loading from '../../components/loading/Loading';
 import MinLogo from "../../assets/images/min-logo.png";
+
 
 
 export const ViewBuses = () => {
@@ -22,7 +24,7 @@ export const ViewBuses = () => {
     origin: '',
     destination: '',
 
-    pageLoading: false,
+    pageLoading: true,
     buttonDisabled: false,
   });
 
@@ -37,6 +39,7 @@ export const ViewBuses = () => {
             }));
         })
         .catch((error) => {
+            setState((prevState) => ({ ...prevState, pageLoading: false }));
             return console.log(error);
         });
     };
@@ -116,7 +119,6 @@ export const ViewBuses = () => {
 
             <div className='flex h-full w-full justify-center'>
                 <div className='mx-[10%] flex w-full flex-col items-center'>
-
                     <div className='flex w-full justify-between'>
                         <div className='text-white bg-orange rounded-lg p-5'>
                             <h1 className='text-center text-2xl font-bold mb-4'> {state?.message} </h1>
@@ -139,7 +141,7 @@ export const ViewBuses = () => {
                             <img src={Map} alt='map' className='absolute left-0 top-0 h-full w-full' />
                             {
                                 state?.routeBuses.length > 0
-                                ? (<div onClick={() => navigate('/map-buses')} className='border-color-gray z-10 ml-4 cursor-pointer rounded-full border bg-orange/80 p-4 text-white transition-all duration-300 hover:scale-105' > Track buses </div>)
+                                ? (<div onClick={() => navigate(`/map-buses?origin=${encrypt(state?.origin)}&destination=${encrypt(state?.destination)}`)} className='border-color-gray z-10 ml-4 cursor-pointer rounded-full border bg-orange/80 p-4 text-white transition-all duration-300 hover:scale-105' > Track buses </div>)
                                 : (<div className='border-color-gray z-10 ml-4 cursor-pointer rounded-full border bg-orange/30 p-4 text-white transition-all duration-300 hover:scale-105'> Track buses </div>)
                             }
                         </div>
@@ -242,7 +244,6 @@ export const ViewBuses = () => {
                             </tbody>
                         </table>
                     </div>
-
                 </div>
             </div>
         </section>

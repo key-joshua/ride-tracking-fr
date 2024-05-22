@@ -1,3 +1,4 @@
 import * as variables from './variables';
+import { encrypt, dencrypt } from './hash';
 
-export { variables }
+export { variables, encrypt, dencrypt }
